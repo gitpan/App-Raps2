@@ -1,0 +1,38 @@
+---
+name: App-Raps2
+version: 0.1
+author:
+  - 'Copyright (C) 2011 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>'
+abstract: '"Right, Another Password Store" take two'
+license: unrestricted
+build_requires:
+  Test::Command: 0
+  Test::Compile: 0
+  Test::Fatal: 0
+  Test::More: 0
+  Test::Pod: 0
+requires:
+  Crypt::CBC: 0
+  Crypt::Eksblowfish: 0
+  Crypt::Eksblowfish::Bcrypt: 0
+  File::Path: 0
+  File::Slurp: 0
+  POSIX: 0
+  autodie: 0
+  perl: v5.10.0
+configure_requires:
+  Module::Build: 0.340201
+provides:
+  App::Raps2:
+    file: lib/App/Raps2.pm
+    version: 0.1
+  App::Raps2::Password:
+    file: lib/App/Raps2/Password.pm
+    version: 0.1
+  App::Raps2::UI:
+    file: lib/App/Raps2/UI.pm
+    version: 0.1
+generated_by: Module::Build version 0.340201
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4

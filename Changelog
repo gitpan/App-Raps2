@@ -1,0 +1,5 @@
+raps2 0.1 - Fri May 06 2011
+
+    * Eksblowfish crypto
+    * raps2 add/dump/get/info commands
+    * Supports URL, Login, Password and Extra fields

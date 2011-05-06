@@ -1,0 +1,114 @@
+#!/usr/bin/env perl
+## Copyright © 2011 by Daniel Friesel <derf@finalrewind.org>
+## License: WTFPL:
+##   0. You just DO WHAT THE FUCK YOU WANT TO.
+use strict;
+use warnings;
+use 5.010;
+use autodie;
+
+use App::Raps2;
+
+my $raps2 = App::Raps2->new();
+my ($action, @args) = @ARGV;
+
+my $VERSION = '0.1';
+
+$raps2->sanity_check();
+$raps2->load_config();
+
+given ($action) {
+	when ('add')  { $raps2->cmd_add(@args) }
+	when ('dump') { $raps2->cmd_dump(@args) }
+	when ('get')  { $raps2->cmd_get(@args) }
+	when ('info') { $raps2->cmd_info(@args) }
+	when ('version') { say "raps2 version ${VERSION}" }
+}
+
+__END__
+
+=head1 NAME
+
+raps2 - "Right, Another Password Store" take two
+
+=head1 SYNOPSIS
+
+B<raps2> I<action> I<args ...>
+
+=head1 VERSION
+
+This manual documents B<raps2> version 0.1
+
+=head1 DESCRIPTION
+
+raps2 is a simple password safe.  You give it a name, a password and optional
+metadata, and it will encrypt and store them for you.  You probably want to
+start with C<< raps2 add accountname >>, and then later use C<< raps2 get
+accountname >> and paste the corresponding password into whatever application
+requires it.  B<raps2> will automatically initialize its store when used for
+the first time.
+
+=head1 ACTIONS
+
+=over
+
+=item B<add> I<account>
+
+Adds I<account> to the store.  It will ask you for the store's master
+password, some metadata and the new password and then store them.  Note that
+only the password is encrypted, the metadata is saved as clear-text.
+
+=item B<dump> I<account>
+
+Dump everything saved for I<account>, including the clear-text password, to
+stdout.
+
+=item B<get> I<account>
+
+Decrypt I<account>'s password and store it in the X Clipboard.  Note that it
+can only be pasted once.
+
+=item B<info> I<account>
+
+Show information about I<account>, does not require the master password.
+
+=back
+
+=head1 EXIT STATUS
+
+zero on success, non-zero otherwise.
+
+=head1 CONFIGURATION
+
+raps2 saves the master password hash in F<~/.config/raps2/password>.
+
+Additional encrypted passwords are stored in F<~/.local/share/raps2/>.
+
+=head1 DEPENDENCIES
+
+=over
+
+=item * Crypt::CBC
+
+=item * Crypt::Eksblowfish
+
+=item * File::Path (usually included with perl core)
+
+=item * File::Slurp
+
+=item * xclip (for C<< raps2 get >>)
+
+=back
+
+=head1 BUGS AND LIMITATIONS
+
+This is alpha software, the store format may change without further notice.
+Backwards-compatibility is not guaranteed.
+
+=head1 AUTHOR
+
+Copyright (C) 2011 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
+
+=head1 LICENSE
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
