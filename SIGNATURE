@@ -1,0 +1,38 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.67.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 7a82bcc6bcec33a8141a3ef6372952e3bb9a0527 Build.PL
+SHA1 cc97e889a41642cf85ee5f78e5ab4f1f81af9c00 COPYING
+SHA1 d43ea096ba98b587ff0a96c1d60673816a44697e Changelog
+SHA1 6feb8ddd125ddc625883f79163c43355f18a48d8 MANIFEST
+SHA1 a2a73f5ba5ab23eab26b9b62343a8b587e8d096f META.yml
+SHA1 fe36b760db7c846802984d8634dbf81a6b7bc273 README
+SHA1 2cced5dbd979eb2bc9a3f3eb9645adef4135697d bin/raps2
+SHA1 ac7ea691507f7317c6f19e297a2f7dcb82b19686 lib/App/Raps2.pm
+SHA1 22adb1cb0e13c12d413e820253653a4c2ebf6633 lib/App/Raps2/Password.pm
+SHA1 e1c16248a7064b54ca89a6fb38c22496afad5957 lib/App/Raps2/UI.pm
+SHA1 16e17fb749b2b1e349e5e985bb68b0a0bd928766 t/00-compile.t
+SHA1 d6935cd7454a48ed1271dc18a4b87789fc5e02fb t/10-pod-coverage.t
+SHA1 1630982a9825e25c28c711c8ba2311b23689a856 t/20-app-raps2-password.t
+SHA1 868c1cf56f029b470225a985509147280e278c6c t/29-app-raps2.t
+SHA1 29063e3932cc91591bc3477408b639f8e403f473 t/in/hash
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAk3NHpMACgkQjuWtMO0ss3+dagCglUGADK1D+YoYdlS0KE5srVIA
+DvYAnA5cxjUCK3s/1QCYVd+cYwo65Zrh
+=+hHt
+-----END PGP SIGNATURE-----

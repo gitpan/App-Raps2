@@ -1,3 +1,9 @@
+raps2 0.2 - Fri May 13 2011
+
+    * Fix XDG_CONFIG_HOME / XDG_DATA_HOME handling bug. Adds new dependency
+      File::BaseDir
+    * Add "raps2 list" to list all saved accounts
+
 raps2 0.1 - Fri May 06 2011
 
     * Eksblowfish crypto

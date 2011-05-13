@@ -12,7 +12,7 @@ use App::Raps2;
 my $raps2 = App::Raps2->new();
 my ($action, @args) = @ARGV;
 
-my $VERSION = '0.1';
+my $VERSION = '0.2';
 
 $raps2->sanity_check();
 $raps2->load_config();
@@ -22,6 +22,7 @@ given ($action) {
 	when ('dump') { $raps2->cmd_dump(@args) }
 	when ('get')  { $raps2->cmd_get(@args) }
 	when ('info') { $raps2->cmd_info(@args) }
+	when ('list') { $raps2->cmd_list(@args) }
 	when ('version') { say "raps2 version ${VERSION}" }
 }
 
@@ -37,7 +38,7 @@ B<raps2> I<action> I<args ...>
 
 =head1 VERSION
 
-This manual documents B<raps2> version 0.1
+This manual documents B<raps2> version 0.2
 
 =head1 DESCRIPTION
 
@@ -91,6 +92,8 @@ Additional encrypted passwords are stored in F<~/.local/share/raps2/>.
 =item * Crypt::CBC
 
 =item * Crypt::Eksblowfish
+
+=item * File::BaseDir
 
 =item * File::Path (usually included with perl core)
 

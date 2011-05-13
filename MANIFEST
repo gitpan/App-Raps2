@@ -6,7 +6,6 @@ lib/App/Raps2.pm
 lib/App/Raps2/Password.pm
 lib/App/Raps2/UI.pm
 MANIFEST			This list of files
-MANIFEST.SKIP
 README
 t/00-compile.t
 t/10-pod-coverage.t
@@ -14,3 +13,4 @@ t/20-app-raps2-password.t
 t/29-app-raps2.t
 t/in/hash
 META.yml
+SIGNATURE    Added here by Module::Build

@@ -5,18 +5,26 @@ use warnings;
 use autodie;
 use 5.010;
 
-use base 'Exporter';
-
 use Carp qw(confess);
 use POSIX;
 
-our @EXPORT_OK = ();
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 sub new {
 	my ($obj) = @_;
 	my $ref = {};
 	return bless($ref, $obj);
+}
+
+sub list {
+	my ($self, @list) = @_;
+	my $format = "%-20s %-20s %s\n";
+
+	if (not $self->{list}->{header}) {
+		printf($format, map { $_->[0] } @list);
+		$self->{list}->{header} = 1;
+	}
+	printf($format, map { $_->[1] // q{} } @list);
 }
 
 sub read_line {
