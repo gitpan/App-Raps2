@@ -2,19 +2,56 @@ package App::Raps2::UI;
 
 use strict;
 use warnings;
-use autodie;
 use 5.010;
 
 use Carp qw(confess);
 use POSIX;
+use Term::ReadLine;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
+
+=head1 NAME
+
+App::Raps2::UI - App::Raps2 User Interface
+
+=head1 SYNOPSIS
+
+    my $ui = App::Raps2::UI->new();
+
+    my $input = $ui->read_line('Say something');
+
+    my $password = $ui->read_pw('New password', 1);
+
+    $ui->to_clipboard('stuff!');
+
+=head1 VERSION
+
+This manual documents B<App::Raps2::UI> version 0.3
+
+=head1 METHODS
+
+=over
+
+=item $ui = App::Raps2::UI->new()
+
+Returns a new App::Raps2::UI object.
+
+=cut
 
 sub new {
 	my ($obj) = @_;
 	my $ref = {};
+	$ref->{term_readline} = Term::ReadLine->new('App::Raps2');
 	return bless($ref, $obj);
 }
+
+=item $ui->list(I<\@item1>, I<\@item2>, I<\@item3>)
+
+Print the list items neatly formatted to stdout. Each I<item> looks like B<[>
+I<key>, I<value> B<]>. When B<list> is called for the first time, it will
+print the keys as well as the values.
+
+=cut
 
 sub list {
 	my ($self, @list) = @_;
@@ -27,15 +64,30 @@ sub list {
 	printf($format, map { $_->[1] // q{} } @list);
 }
 
+=item $ui->read_line(I<$question>, [I<$prefill>])
+
+Print "I<question>: " to stdout and wait for the user to input text followed
+by a newline.  I<prefill> sets the default content of the answer field.
+
+Returns the user's reply, excluding the newline.
+
+=cut
+
 sub read_line {
-	my ($self, $str) = @_;
+	my ($self, $str, $pre) = @_;
 
-	print "${str}: ";
-	my $input = readline(STDIN);
+	my $input = $self->{term_readline}->readline("${str}: ", $pre);
 
-	chomp $input;
 	return $input;
 }
+
+=item $ui->read_multiline(I<$message>)
+
+Like B<read_line>, but repeats I<message> each time the user hits return.
+Input is terminated by EOF (Ctrl+D).  Returns a string concatenation of all
+lines (including newlines).
+
+=cut
 
 sub read_multiline {
 	my ($self, $str) = @_;
@@ -43,11 +95,19 @@ sub read_multiline {
 
 	say "${str} (^D to quit)";
 
-	while (my $line = <STDIN>) {
-		$in .= $line;
+	while (my $line = $self->read_line('multiline')) {
+		$in .= "${line}\n";
 	}
 	return $in;
 }
+
+=item $ui->read_pw(I<$message>, I<$verify>)
+
+Prompt the user for a password. I<message> is displayed, the user's input is
+noch echoed.  If I<verify> is set, the user has to enter the same input twice,
+otherwise B<read_pw> dies.  Returns the input.
+
+=cut
 
 sub read_pw {
 	my ($self, $str, $verify) = @_;
@@ -79,6 +139,12 @@ sub read_pw {
 	return $in1;
 }
 
+=item $ui->to_clipboard(I<$string>)
+
+Place I<string> in the primary X Clipboard.
+
+=cut
+
 sub to_clipboard {
 	my ($self, $str) = @_;
 
@@ -87,6 +153,13 @@ sub to_clipboard {
 	close($clipboard);
 	return;
 }
+
+=item $ui->output(I<\@pair>, I<...>)
+
+I<pair> consinsts of B<[> I<key>, I<value> B<]>. For each I<pair>, prints
+"     key : value" to stdout.
+
+=cut
 
 sub output {
 	my ($self, @out) = @_;
@@ -102,3 +175,23 @@ sub output {
 }
 
 1;
+
+__END__
+
+=back
+
+=head1 DEPENDENCIES
+
+This module requires B<Term::ReadLine> and the B<xclip> executable.
+
+=head1 SEE ALSO
+
+App::Raps2(3pm).
+
+=head1 AUTHOR
+
+Copyright (C) 2011 by Daniel Friesel E<lt>derf@finalrewind.orgE<gt>
+
+=head1 LICENSE
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.

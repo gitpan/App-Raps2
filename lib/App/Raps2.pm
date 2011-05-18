@@ -29,7 +29,6 @@ B<App::Raps2> is the backend for B<raps2>, a simple commandline password safe.
 
 use strict;
 use warnings;
-use autodie;
 use 5.010;
 
 use App::Raps2::Password;
@@ -39,7 +38,7 @@ use File::BaseDir qw(config_home data_home);
 use File::Path qw(make_path);
 use File::Slurp qw(read_dir slurp write_file);
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 =head1 METHODS
 
@@ -73,23 +72,6 @@ sub new {
 	$ref->{default} = \%conf;
 
 	return bless($ref, $obj);
-}
-
-=item $raps2->create_salt()
-
-Returns a 16-character random salt for App::Raps2::Password(3pm).
-
-=cut
-
-sub create_salt {
-	my ($self) = @_;
-	my $salt = q{};
-
-	for (1 .. 16) {
-		$salt .= chr(0x21 + int(rand(90)));
-	}
-
-	return $salt;
 }
 
 =item $raps2->file_to_hash(I<$file>)
@@ -145,7 +127,7 @@ Asks the user for the master passphrase.
 
 sub get_master_password {
 	my ($self) = @_;
-	my $pass = $self->ui()->read_pw('Master Password', 0);
+	my $pass = $self->ui->read_pw('Master Password', 0);
 
 	$self->{pass} = App::Raps2::Password->new(
 		cost => $self->{default}->{cost},
@@ -165,15 +147,14 @@ Creates a default config and asks the user to set a master password.
 sub create_config {
 	my ($self) = @_;
 	my $cost = 12;
-	my $salt = $self->create_salt();
-	my $pass = $self->ui()->read_pw('Master Password', 1);
+	my $pass = $self->ui->read_pw('Master Password', 1);
 
 	$self->{pass} = App::Raps2::Password->new(
 		cost => $cost,
-		salt => $salt,
 		passphrase => $pass,
 	);
-	my $hash = $self->{pass}->crypt();
+	my $hash = $self->pw->crypt();
+	my $salt = $self->pw->salt();
 
 	write_file(
 		$self->{xdg_conf} . '/password',
@@ -195,6 +176,23 @@ sub load_config {
 	$self->{master_hash} = $cfg{hash};
 	$self->{master_salt} = $cfg{salt};
 	$self->{default}->{cost} //= $cfg{cost};
+}
+
+=item $raps2->pw()
+
+Returns the App::Raps2::Password(3pm) object.
+
+=cut
+
+sub pw {
+	my ($self) = @_;
+
+	if (defined $self->{pass}) {
+		return $self->{pass};
+	}
+	else {
+		confess('No App::Raps2::Password object, did you call get_master_password?');
+	}
 }
 
 =item $raps2->ui()
@@ -224,17 +222,17 @@ sub cmd_add {
 
 	$self->get_master_password();
 
-	my $salt = $self->create_salt();
-	my $url = $self->ui()->read_line('URL');
-	my $login = $self->ui()->read_line('Login');
-	my $pass = $self->ui()->read_pw('Password', 1);
-	my $extra = $self->ui()->read_multiline('Additional content');
+	my $salt  = $self->pw->create_salt();
+	my $url   = $self->ui->read_line('URL');
+	my $login = $self->ui->read_line('Login');
+	my $pass  = $self->ui->read_pw('Password', 1);
+	my $extra = $self->ui->read_multiline('Additional content');
 
-	$self->{pass}->salt($salt);
-	my $pass_hash = $self->{pass}->encrypt($pass);
+	$self->pw->salt($salt);
+	my $pass_hash = $self->pw->encrypt($pass);
 	my $extra_hash = (
 		$extra ?
-		$self->{pass}->encrypt($extra) :
+		$self->pw->encrypt($extra) :
 		q{}
 	);
 
@@ -249,9 +247,9 @@ sub cmd_add {
 	);
 }
 
-=item $raps2->cmd_dump(I<$name>)
+=item $raps2->cmd_dump(I<$account>)
 
-Dumps the content of $name.
+Dumps the content of I<account>
 
 =cut
 
@@ -267,16 +265,59 @@ sub cmd_dump {
 
 	$self->get_master_password();
 
-	$self->{pass}->salt($key{salt});
+	$self->pw->salt($key{salt});
 
 	$self->ui()->output(
 		['URL', $key{url}],
 		['Login', $key{login}],
-		['Password', $self->{pass}->decrypt($key{hash})],
+		['Password', $self->pw->decrypt($key{hash})],
 	);
 	if ($key{extra}) {
-		print $self->{pass}->decrypt($key{extra});
+		print $self->pw->decrypt($key{extra});
 	}
+}
+
+=item $raps2->cmd_edit(I<$acount>)
+
+Edit I<account>.
+
+=cut
+
+sub cmd_edit {
+	my ($self, $name) = @_;
+	my $pwfile = $self->{xdg_data} . "/${name}";
+	my $pass_hash;
+
+	if (not -e $pwfile) {
+		confess('Password file does not exist');
+	}
+
+	my %key = $self->file_to_hash($pwfile);
+
+	$self->get_master_password();
+	$self->pw->salt($key{salt});
+
+	my $salt = $key{salt};
+	my $url   = $self->ui->read_line('URL', $key{url});
+	my $login = $self->ui->read_line('Login', $key{login});
+	my $pass  = $self->ui->read_pw('New password (empty to keep old)', 1);
+	my $extra = $key{extra} // q{};
+
+	if (length($pass)) {
+		$pass_hash = $self->pw->encrypt($pass);
+	}
+	else {
+		$pass_hash = $key{hash};
+	}
+
+	write_file(
+		$pwfile,
+		"url ${url}\n",
+		"login ${login}\n",
+		"salt ${salt}\n",
+		"hash ${pass_hash}\n",
+		"extra ${extra}\n",
+	);
 }
 
 =item $raps2->cmd_get(I<$name>)
@@ -297,12 +338,12 @@ sub cmd_get {
 
 	$self->get_master_password();
 
-	$self->{pass}->salt($key{salt});
+	$self->pw->salt($key{salt});
 
-	$self->ui()->to_clipboard($self->{pass}->decrypt($key{hash}));
+	$self->ui()->to_clipboard($self->pw->decrypt($key{hash}));
 
 	if ($key{extra}) {
-		print $self->{pass}->decrypt($key{extra})
+		print $self->pw->decrypt($key{extra})
 	}
 }
 
@@ -335,14 +376,33 @@ Lists all saved passwords and their logins and urls
 
 sub cmd_list {
 	my ($self) = @_;
+	my @files = read_dir($self->{xdg_data});
 
-	for my $file (read_dir($self->{xdg_data})) {
+	for my $file (sort @files) {
 		my %key = $self->file_to_hash($self->{xdg_data} . "/${file}");
 		$self->ui->list(
 			['Account', $file],
 			['Login', $key{login}],
 			['URL', $key{url}],
 		);
+	}
+}
+
+=item $raps2->cmd_remove(I<$name>)
+
+Remove (unlink) the account I<name>.
+
+=cut
+
+sub cmd_remove {
+	my ($self, $name) = @_;
+	my $pwfile = $self->{xdg_data} . "/${name}";
+
+	if (-e $pwfile) {
+		unlink($pwfile);
+	}
+	else {
+		say STDERR 'File did not exist, so could not be removed';
 	}
 }
 
