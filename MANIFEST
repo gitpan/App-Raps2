@@ -8,7 +8,7 @@ lib/App/Raps2/UI.pm
 MANIFEST			This list of files
 README
 t/00-compile.t
-t/10-pod-coverage.t
+t/05-pod-compile.t
 t/20-app-raps2-password.t
 t/29-app-raps2.t
 t/in/hash
