@@ -8,7 +8,7 @@ use Carp qw(confess);
 use POSIX;
 use Term::ReadLine;
 
-our $VERSION = '0.4';
+our $VERSION = '0.50';
 
 sub new {
 	my ($obj) = @_;
@@ -47,7 +47,7 @@ sub read_multiline {
 
 	my $in;
 
-	say "${str} (^D to quit)";
+	say "${str} (^D or empty line to quit)";
 
 	while ( my $line = $self->read_line('multiline') ) {
 		$in .= "${line}\n";
@@ -132,7 +132,7 @@ App::Raps2::UI - App::Raps2 User Interface
 
 =head1 VERSION
 
-This manual documents B<App::Raps2::UI> version 0.4
+This manual documents B<App::Raps2::UI> version 0.50
 
 =head1 DESCRIPTION
 
