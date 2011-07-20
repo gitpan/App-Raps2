@@ -4,11 +4,11 @@ use strict;
 use warnings;
 use 5.010;
 
-use Carp qw(confess);
+use Carp qw(cluck confess);
 use POSIX;
 use Term::ReadLine;
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 sub new {
 	my ($obj) = @_;
@@ -31,7 +31,7 @@ sub list {
 	}
 	printf( $format, map { $_->[1] // q{} } @list );
 
-	return;
+	return 1;
 }
 
 sub read_line {
@@ -92,14 +92,14 @@ sub to_clipboard {
 	my ( $self, $str ) = @_;
 
 	open( my $clipboard, q{|-}, 'xclip -l 1' )
-	  or confess("Failed to execute xclip -l 1: $!");
+	  or return;
 
 	print $clipboard $str;
 
 	close($clipboard)
-	  or confess("Failed to close pipe to xclip: $!");
+	  or cluck("Failed to close pipe to xclip: $!");
 
-	return;
+	return 1;
 }
 
 sub output {
@@ -109,7 +109,7 @@ sub output {
 		printf( "%-8s : %s\n", $pair->[0], $pair->[1] // q{}, );
 	}
 
-	return;
+	return 1;
 }
 
 1;
@@ -132,7 +132,7 @@ App::Raps2::UI - App::Raps2 User Interface
 
 =head1 VERSION
 
-This manual documents B<App::Raps2::UI> version 0.50
+This manual documents B<App::Raps2::UI> version 0.51
 
 =head1 DESCRIPTION
 
@@ -174,7 +174,10 @@ otherwise B<read_pw> dies.  Returns the input.
 
 =item $ui->to_clipboard(I<$string>)
 
-Place I<string> in the primary X Clipboard.
+Place I<string> in the primary X Clipboard (by calling the B<xclip> program)
+
+Returns true upon success, undef if the operation failed. Use $! to get the
+error message.
 
 =item $ui->output(I<\@pair>, I<...>)
 

@@ -9,7 +9,7 @@ use Crypt::CBC;
 use Crypt::Eksblowfish;
 use Crypt::Eksblowfish::Bcrypt qw(bcrypt_hash en_base64 de_base64);
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 sub new {
 	my ( $obj, %conf ) = @_;
@@ -59,27 +59,29 @@ sub salt {
 }
 
 sub encrypt {
-	my ( $self, $in, $salt ) = @_;
+	my ( $self, %opt ) = @_;
 
-	$salt //= $self->{salt};
+	$opt{salt} //= $self->{salt};
+	$opt{cost} //= $self->{cost};
 
 	my $eksblowfish
-	  = Crypt::Eksblowfish->new( $self->{cost}, $salt, $self->{passphrase}, );
+	  = Crypt::Eksblowfish->new( $opt{cost}, $opt{salt}, $self->{passphrase}, );
 	my $cbc = Crypt::CBC->new( -cipher => $eksblowfish );
 
-	return $cbc->encrypt_hex($in);
+	return $cbc->encrypt_hex( $opt{data} );
 }
 
 sub decrypt {
-	my ( $self, $in, $salt ) = @_;
+	my ( $self, %opt ) = @_;
 
-	$salt //= $self->{salt};
+	$opt{cost} //= $self->{cost};
+	$opt{salt} //= $self->{salt};
 
 	my $eksblowfish
-	  = Crypt::Eksblowfish->new( $self->{cost}, $salt, $self->{passphrase}, );
+	  = Crypt::Eksblowfish->new( $opt{cost}, $opt{salt}, $self->{passphrase}, );
 	my $cbc = Crypt::CBC->new( -cipher => $eksblowfish );
 
-	return $cbc->decrypt_hex($in);
+	return $cbc->decrypt_hex( $opt{data} );
 }
 
 sub bcrypt {
@@ -133,7 +135,7 @@ App::Raps2::Password - Password class for App::Raps2
 
 =head1 VERSION
 
-This manual documents B<App::Raps2::Password> version 0.50
+This manual documents B<App::Raps2::Password> version 0.51
 
 =head1 DESCRIPTION
 
@@ -173,7 +175,8 @@ Returns a new 16-byte salt. Contains only printable characters.
 
 Returns the currently used salt and optionally changes it to I<salt>.
 
-=item $pass->encrypt(I<data>, [I<salt>])
+=item $pass->encrypt(B<data> => I<data>, [B<salt> => I<salt>],
+[B<cost> => I<cost>])
 
 Encrypts I<data> with the passphrase saved in the object, returns the
 corresponding hexadecimal hash (as string).
@@ -181,7 +184,8 @@ corresponding hexadecimal hash (as string).
 By default, the salt set in B<salt> or B<new> will be used. You can override
 it by specifying I<salt>.
 
-=item $pass->decrypt(I<hexstr>, [I<salt>])
+=item $pass->decrypt(B<data> => I<hexstr>, [B<salt> => I<salt>],
+[B<cost> => I<cost>])
 
 Decrypts I<hexstr> (as created by B<encrypt>), returns its original content.
 
