@@ -18,13 +18,13 @@ name: App-Raps2
 provides:
   App::Raps2:
     file: lib/App/Raps2.pm
-    version: 0.52
+    version: 0.53
   App::Raps2::Password:
     file: lib/App/Raps2/Password.pm
-    version: 0.52
+    version: 0.53
   App::Raps2::UI:
     file: lib/App/Raps2/UI.pm
-    version: 0.52
+    version: 0.53
 requires:
   Carp: 0
   Config::Tiny: 0
@@ -38,4 +38,4 @@ requires:
   POSIX: 0
   Term::ReadLine: 0
   perl: v5.10.0
-version: 0.52
+version: 0.53

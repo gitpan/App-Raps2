@@ -12,7 +12,7 @@ use File::BaseDir qw(config_home data_home);
 use File::Path qw(make_path);
 use File::Slurp qw(slurp write_file);
 
-our $VERSION = '0.52';
+our $VERSION = '0.53';
 
 sub new {
 	my ( $class, %opt ) = @_;
@@ -134,11 +134,13 @@ sub create_defaults {
 
 	my $cost      = $self->{default}{cost}      // 12;
 	my $pwgen_cmd = $self->{default}{pwgen_cmd} // 'pwgen -s 23 1';
+	my $xclip_cmd = $self->{default}{xclip_cmd} // 'xclip -l 1';
 
 	write_file(
 		$self->{xdg_conf} . '/defaults',
 		"cost = ${cost}\n",
 		"pwgen_cmd = ${pwgen_cmd}\n",
+		"xclip_cmd = ${xclip_cmd}\n",
 	);
 
 	return;
@@ -151,6 +153,7 @@ sub load_defaults {
 
 	$self->{default}{cost}      //= $cfg->{_}->{cost};
 	$self->{default}{pwgen_cmd} //= $cfg->{_}->{pwgen_cmd};
+	$self->{default}{xclip_cmd} //= $cfg->{_}->{xclip_cmd};
 
 	return;
 }
@@ -299,7 +302,7 @@ B<App::Raps2> is the backend for B<raps2>, a simple commandline password safe.
 
 =head1 VERSION
 
-This manual documents App::Raps2 version 0.52
+This manual documents App::Raps2 version 0.53
 
 =head1 METHODS
 
